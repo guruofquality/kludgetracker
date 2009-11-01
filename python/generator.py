@@ -4,6 +4,7 @@ def Template(_tmpl_str, **kwargs):
 
 TMPL="""
 #import os
+#set $rel_dir = $rel_dir or '.'
 <html>
 	<head>
 		<title>$rel_dir - $title</title>
@@ -154,11 +155,10 @@ class generator(object):
 		#generate html for each subdirectory
 		for subdir in list(result.get_subdirs()) + ['']:
 
-			#subdir = os.path.join('.', subdir)
 			html_file = os.path.join(gen_dir, subdir, 'index.html')
 			try: os.makedirs(os.path.dirname(html_file))
 			except: pass
-			print html_file
+			print 'Generating:', html_file
 
 			open(html_file, 'w').write(Template(TMPL,
 				title='Kludge Tracker: %s'%self._title,

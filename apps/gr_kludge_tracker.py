@@ -19,4 +19,4 @@ if __name__ == '__main__':
 	results = list()
 	files = kludgetracker.get_matching_files(sys.argv[1], file_matcher)
 	result = parser(files, path=sys.argv[1])
-	kludgetracker.generator(result, title='Gnuradio').generate('html')
+	kludgetracker.generator(result, title='Gnuradio').generate('gr_kludge_tracker')

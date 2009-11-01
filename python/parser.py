@@ -71,6 +71,7 @@ class parser(object):
 	def __call__(self, files, path='/'):
 		chunks = list()
 		for file in files:
+			print 'Parsing:', os.path.abspath(file)
 			lines = open(file, 'r').readlines()
 			for matcher in self._matchers:
 				for i, line in enumerate(lines):
