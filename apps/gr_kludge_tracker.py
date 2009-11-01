@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import re
+import os
 import sys
 import kludgetracker
 
@@ -16,7 +17,11 @@ def file_matcher(file_name):
 	return re.compile('^((\w*\.)*(m4|am|in|ac|py|c|cc|h|t))$').match(file_name)
 
 if __name__ == '__main__':
+	try: assert len(sys.argv) == 3
+	except AssertionError:
+		print 'Usage: gr_kludge_tracker <source_dir> <html_dir>'
+		exit()
 	results = list()
 	files = kludgetracker.get_matching_files(sys.argv[1], file_matcher)
 	result = parser(files, path=sys.argv[1])
-	kludgetracker.generator(result, title='Gnuradio').generate('gr_kludge_tracker')
+	kludgetracker.generator(result, title='Gnuradio').generate(sys.argv[2])

@@ -37,8 +37,10 @@ class _result(object):
 			if files is not None and chunk.get_file() in files: return True
 			if categories is not None and chunk.get_category() in categories: return True
 			if subdir is not None:
-				reldir = os.path.relpath(os.path.split(chunk.get_file())[0], subdir)
-				if '..' not in reldir: return True
+				dirname = os.path.dirname(chunk.get_file())
+				if dirname:
+					reldir = os.path.relpath(dirname, subdir)
+					if '..' not in reldir: return True
 			return False
 		return _result(filter(is_match, self._chunks))
 

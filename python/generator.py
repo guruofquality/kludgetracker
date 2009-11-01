@@ -4,7 +4,6 @@ def Template(_tmpl_str, **kwargs):
 
 TMPL="""
 #import os
-#set $rel_dir = $rel_dir or '.'
 <html>
 	<head>
 		<title>$rel_dir - $title</title>
@@ -82,7 +81,12 @@ background-color:#FCFCFC;
 	<body>
 		<h1>$title</h1>
 		####### summary #######
-		<h2>Summary of $rel_dir</h2>
+		<h2>Kludge Summary of $rel_dir</h2>
+		#if $os.path.dirname($rel_dir)
+		<p>
+			<a href="$os.path.join('..', 'index.html')">Parent Directory ($os.path.dirname($rel_dir))</a>
+		</p>
+		#end if
 		<table>
 			<tr>
 				<th>Category</th>
@@ -99,11 +103,6 @@ background-color:#FCFCFC;
 				<td>$len($result)</td>
 			</tr>
 		</table>
-		#if $os.path.dirname($rel_dir)
-		<p>
-			<a href="$os.path.join('..', 'index.html')">Parent Directory ($os.path.dirname($rel_dir))</a>
-		</p>
-		#end if
 		####### build dir toc #######
 		#set $subdirs = $result.get_subdirs()
 		#set $subdirs = filter(lambda sd: len(sd) > len($rel_dir), $subdirs)
@@ -123,7 +122,7 @@ background-color:#FCFCFC;
 		#end for
 		</ul>
 		####### file list #######
-		<h2>Snippets in $rel_dir</h2>
+		<h2>Kludge Snippets in $rel_dir</h2>
 		#for $file in $files
 			#set $subresult = $result.get_subset(files=[$file])
 		<a name="$file"></a>
@@ -153,7 +152,7 @@ class generator(object):
 		result = self._result
 
 		#generate html for each subdirectory
-		for subdir in list(result.get_subdirs()) + ['']:
+		for subdir in sorted(result.get_subdirs()):
 
 			html_file = os.path.join(gen_dir, subdir, 'index.html')
 			try: os.makedirs(os.path.dirname(html_file))
