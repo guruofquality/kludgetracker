@@ -1,4 +1,5 @@
 from parser import parser
+from generator import generator
 
 import os
 def get_matching_files(path, matcher):

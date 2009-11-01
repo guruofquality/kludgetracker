@@ -32,16 +32,27 @@ class _result(object):
 	"""
 	def __init__(self, chunks): self._chunks = chunks
 
-	def get_chunks(self, files=None, categories=None):
-		if files is None: files = self.get_files()
-		if categories is None: categories = self.get_categories()
-		def is_match(chunk): return \
-			chunk.get_file() in files or \
-			chunk.get_category() in categories
-		return filter(is_match, self._chunks)
+	def get_subset(self, files=None, categories=None, subdir=None):
+		def is_match(chunk):
+			if files is not None and chunk.get_file() in files: return True
+			if categories is not None and chunk.get_category() in categories: return True
+			if subdir is not None:
+				reldir = os.path.relpath(os.path.split(chunk.get_file())[0], subdir)
+				if '..' not in reldir: return True
+			return False
+		return _result(filter(is_match, self._chunks))
 
-	def get_files(self): return set(map(_chunk.get_file, self._chunks))
-	def get_categories(self): return set(map(_chunk.get_category, self._chunks))
+	def __len__(self): return len(self.get_chunks())
+	def get_chunks(self): return self._chunks
+	def get_files(self): return set(map(_chunk.get_file, self.get_chunks()))
+	def get_categories(self): return set(map(_chunk.get_category, self.get_chunks()))
+	def get_subdirs(self):
+		subdirs = set()
+		for subdir in set(map(os.path.dirname, self.get_files())):
+			while subdir:
+				subdirs.add(subdir)
+				subdir = os.path.dirname(subdir)
+		return subdirs
 
 class parser(object):
 	"""
