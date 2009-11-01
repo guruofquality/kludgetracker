@@ -1,0 +1,3 @@
+SUBDIRS = \
+	apps \
+	python

@@ -1,0 +1,5 @@
+rm -rf *.cache
+
+aclocal
+autoconf
+automake --add-missing --gnu --warnings=all
