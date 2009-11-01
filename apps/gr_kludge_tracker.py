@@ -4,12 +4,13 @@ import re
 import os
 import sys
 import kludgetracker
+from optparse import OptionParser
 
-parser = kludgetracker.parser()
-parser.register_matcher(re.compile('(?i).*(#|//|/\*|\s)todo\s.*').match, category='TODO')
-parser.register_matcher(re.compile('(?i).*(#|//|/\*|\s)fixme\s.*').match, category='FIXME')
-parser.register_matcher(re.compile('(?i).*(#|//|/\*|\s)magic\s.*').match, category='Magic')
-parser.register_matcher(re.compile('(?i).*(#|//|/\*|\s)kludge\s.*').match, category='Kludge')
+gr_kt_parser = kludgetracker.parser()
+gr_kt_parser.register_matcher(re.compile('(?i).*(#|//|/\*|\s)todo\s.*').match, category='TODO')
+gr_kt_parser.register_matcher(re.compile('(?i).*(#|//|/\*|\s)fixme\s.*').match, category='FIXME')
+gr_kt_parser.register_matcher(re.compile('(?i).*(#|//|/\*|\s)magic\s.*').match, category='Magic')
+gr_kt_parser.register_matcher(re.compile('(?i).*(#|//|/\*|\s)kludge\s.*').match, category='Kludge')
 
 def file_matcher(file_name):
 	blacklist = ('gnuradio_swig_py_general.cc', 'Makefile.in')
@@ -17,11 +18,14 @@ def file_matcher(file_name):
 	return re.compile('^((\w*\.)*(m4|am|in|ac|py|c|cc|h|t|v|common))$').match(file_name)
 
 if __name__ == '__main__':
-	try: assert len(sys.argv) == 3
-	except AssertionError:
-		print 'Usage: gr_kludge_tracker <source_dir> <html_dir>'
-		exit()
+	parser = OptionParser()
+	parser.add_option("--src-dir", type="string", default=None)
+	parser.add_option("--html-dir", type="string", default='html')
+	parser.add_option("--desc", type="string", default='unknown version')
+	(options, args) = parser.parse_args()
+
 	results = list()
-	files = kludgetracker.get_matching_files(sys.argv[1], file_matcher)
-	result = parser(files, path=sys.argv[1])
-	kludgetracker.generator(result, title='Gnuradio').generate(sys.argv[2])
+	files = kludgetracker.get_matching_files(options.src_dir, file_matcher)
+	result = gr_kt_parser(files, path=os.path.dirname(options.src_dir))
+	gen = kludgetracker.generator(result, title='Gnuradio - %s'%options.desc)
+	gen.generate(options.html_dir)
