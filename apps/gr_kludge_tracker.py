@@ -14,7 +14,7 @@ ktp.register_matcher(re.compile('(?i).*(#|//|/\*|\s)kludge\s.*').match, category
 def file_matcher(file_name):
 	blacklist = ('gnuradio_swig_py_general.cc', 'Makefile.in')
 	if file_name in blacklist: return False
-	return re.compile('^((\w*\.)*(m4|am|in|ac|py|c|cc|h|t|v|common))$').match(file_name)
+	return re.compile('^((\w*\.)*(m4|am|in|ac|py|c|cc|i|h|t|v|common))$').match(file_name)
 
 if __name__ == '__main__':
 	parser = OptionParser()
