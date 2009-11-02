@@ -1,3 +1,4 @@
+#from xml.sax.saxutils import escape
 #import os
 <html>
 	<head>
@@ -57,7 +58,7 @@
 				<pre>
 					#for $lineno, $line in enumerate($chunk.get_lines())
 						#if $chunk.get_lineno()-5 < $lineno < $chunk.get_lineno()+5
-$($lineno+1)        $line[:-1]
+$($lineno+1)        $escape($line[:-1])
 						#end if
 					#end for
 				</pre>
