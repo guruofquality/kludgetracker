@@ -6,11 +6,11 @@ import sys
 import kludgetracker
 from optparse import OptionParser
 
-gr_kt_parser = kludgetracker.parser()
-gr_kt_parser.register_matcher(re.compile('(?i).*(#|//|/\*|\s)todo\s.*').match, category='TODO')
-gr_kt_parser.register_matcher(re.compile('(?i).*(#|//|/\*|\s)fixme\s.*').match, category='FIXME')
-gr_kt_parser.register_matcher(re.compile('(?i).*(#|//|/\*|\s)magic\s.*').match, category='Magic')
-gr_kt_parser.register_matcher(re.compile('(?i).*(#|//|/\*|\s)kludge\s.*').match, category='Kludge')
+gr_ktp = kludgetracker.parser()
+gr_ktp.register_matcher(re.compile('(?i).*(#|//|/\*|\s)todo\s.*').match, category='TODO')
+gr_ktp.register_matcher(re.compile('(?i).*(#|//|/\*|\s)fixme\s.*').match, category='FIXME')
+gr_ktp.register_matcher(re.compile('(?i).*(#|//|/\*|\s)magic\s.*').match, category='Magic')
+gr_ktp.register_matcher(re.compile('(?i).*(#|//|/\*|\s)kludge\s.*').match, category='Kludge')
 
 def file_matcher(file_name):
 	blacklist = ('gnuradio_swig_py_general.cc', 'Makefile.in')
@@ -26,6 +26,6 @@ if __name__ == '__main__':
 
 	results = list()
 	files = kludgetracker.get_matching_files(options.src_dir, file_matcher)
-	result = gr_kt_parser(files, path=os.path.dirname(options.src_dir))
+	result = gr_ktp(files, path=os.path.dirname(options.src_dir))
 	gen = kludgetracker.generator(result, title='Gnuradio - %s'%options.desc)
 	gen.generate(options.html_dir)

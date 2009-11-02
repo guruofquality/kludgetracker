@@ -1,0 +1,67 @@
+#import os
+<html>
+	<head>
+		<title>$rel_dir - $title</title>
+		<link rel="stylesheet" type="text/css" href="$os.path.join(os.path.relpath('.', $rel_dir), 'style.css')" />
+	</head>
+	<body>
+		<h1>$title</h1>
+		####### summary #######
+		<h2>Kludge Summary of $rel_dir</h2>
+		#if $os.path.dirname($rel_dir)
+		<p>
+			<a href="$os.path.join('..', 'index.html')">Parent Directory ($os.path.dirname($rel_dir))</a>
+		</p>
+		#end if
+		<table>
+			<tr>
+				<th>Category</th>
+				<th>Total</th>
+			</tr>
+			#for $cat in sorted($result.get_categories())
+			<tr>
+				<td>$cat</td>
+				<td>$len($result.get_subset(categories=[$cat]))</td>
+			</tr>
+			#end for
+			<tr>
+				<th>Total</th>
+				<td>$len($result)</td>
+			</tr>
+		</table>
+		####### build dir toc #######
+		#set $subdirs = $result.get_subdirs()
+		#set $subdirs = filter(lambda sd: len(sd) > len($rel_dir), $subdirs)
+		<h3>All Directories within $rel_dir</h3>
+		<ul>
+		#for $subdir in $sorted($subdirs)
+			#set $link = $os.path.relpath($os.path.join($subdir, 'index.html'), $rel_dir)
+			<li><a href="$link">$subdir</a> ($len($result.get_subset(subdir=$subdir)))</li>
+		#end for
+		</ul>
+		####### build file toc #######
+		#set $files = sorted($result.get_files())
+		<h3>All Files within $rel_dir</h3>
+		<ul>
+		#for $file in $files
+			<li><a href="#$file">$file</a> ($len($result.get_subset(files=[$file])))</li>
+		#end for
+		</ul>
+		####### file list #######
+		<h2>Kludge Snippets in $rel_dir</h2>
+		#for $file in $files
+			#set $subresult = $result.get_subset(files=[$file])
+		<a name="$file"></a>
+			#for $i, $chunk in enumerate($subresult.get_chunks())
+				<h3>$(i+1): $file ($chunk.get_category())</h3>
+				<pre>
+					#for $lineno, $line in enumerate($chunk.get_lines())
+						#if $chunk.get_lineno()-5 < $lineno < $chunk.get_lineno()+5
+$($lineno+1)        $line[:-1]
+						#end if
+					#end for
+				</pre>
+			#end for
+		#end for
+	</body>
+</html>
