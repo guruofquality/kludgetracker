@@ -24,6 +24,6 @@ if __name__ == '__main__':
 	(options, args) = parser.parse_args()
 
 	files = kludgetracker.get_matching_files(options.src_dir, file_matcher)
-	result = ktp(files, path=os.path.dirname(options.src_dir))
+	result = ktp(files, path=os.path.dirname(os.path.abspath(options.src_dir)))
 	gen = kludgetracker.generator(result, title='Gnuradio - %s'%options.desc)
 	gen.generate(options.html_dir)
