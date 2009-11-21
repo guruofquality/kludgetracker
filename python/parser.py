@@ -1,4 +1,7 @@
 import os
+import utils
+import pickle
+import tempfile
 
 class _matcher(object):
 	"""
@@ -15,16 +18,16 @@ class _chunk(object):
 	"""
 	A single line with a todofixme and its associated information.
 	"""
-	def __init__(self, file, lines, lineno, matcher):
+	def __init__(self, file, lines, lineno, category):
 		self._file = file
 		self._lines = lines
 		self._lineno = lineno
-		self._matcher = matcher
+		self._category = category
 
 	def get_file(self): return self._file
 	def get_lines(self): return self._lines
 	def get_lineno(self): return self._lineno
-	def get_category(self): return self._matcher.get_category()
+	def get_category(self): return self._category
 
 class _result(object):
 	"""
@@ -71,16 +74,23 @@ class parser(object):
 		self._matchers.append(_matcher(*args, **kwargs))
 
 	def __call__(self, files, path='/'):
-		chunks = list()
-		for file in files:
-			print 'Parsing:', os.path.abspath(file)
-			lines = open(file, 'r').readlines()
-			for matcher in self._matchers:
-				for i, line in enumerate(lines):
-					if matcher(line): chunks.append(_chunk(
-						file = os.path.relpath(file, path),
-						lines = lines,
-						lineno = i,
-						matcher = matcher,
-					))
-		return _result(chunks)
+		num_procs = utils.get_num_procs()
+		tmpfiles = [tempfile.mkstemp()[1] for num in range(num_procs)]
+		for num in range(num_procs):
+			if os.fork(): continue
+			chunks = list()
+			for file in files[num::num_procs]:
+				print 'Parsing:', os.path.abspath(file)
+				lines = open(file, 'r').readlines()
+				for matcher in self._matchers:
+					for i, line in enumerate(lines):
+						if matcher(line): chunks.append(_chunk(
+							file = os.path.relpath(file, path),
+							lines = lines,
+							lineno = i,
+							category = matcher.get_category(),
+						))
+			pickle.dump(chunks, open(tmpfiles[num], 'wb'))
+			exit()
+		for num in range(num_procs): os.wait()
+		return _result(sum([pickle.load(open(tmpfile, 'rb')) for tmpfile in tmpfiles], []))
