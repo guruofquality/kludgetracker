@@ -1,7 +1,7 @@
-import multiprocessing
 import os
+import multiprocessing
 
-def get_num_procs():
+def get_num_procs(): # the famous N+1 heuristic
 	return multiprocessing.cpu_count() + 1
 
 def get_matching_files(path, matcher):

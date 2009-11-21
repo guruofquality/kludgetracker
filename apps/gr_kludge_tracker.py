@@ -2,8 +2,8 @@
 
 import re
 import os
+import optparse
 import kludgetracker
-from optparse import OptionParser
 
 ktp = kludgetracker.parser()
 ktp.register_matcher(re.compile('(?i).*(#|//|/\*|\s)todo\s.*').match, category='TODO')
@@ -17,7 +17,7 @@ def file_matcher(file_name):
 	return re.compile('^((\w*\.)*(m4|am|in|ac|py|c|cc|i|h|t|v|common))$').match(file_name)
 
 if __name__ == '__main__':
-	parser = OptionParser()
+	parser = optparse.OptionParser()
 	parser.add_option("--src-dir", type="string", default=None)
 	parser.add_option("--html-dir", type="string", default='html')
 	parser.add_option("--desc", type="string", default='unknown version')
@@ -27,3 +27,4 @@ if __name__ == '__main__':
 	result = ktp(files, path=os.path.dirname(os.path.abspath(options.src_dir)))
 	gen = kludgetracker.generator(result, title='Gnuradio - %s'%options.desc)
 	gen.generate(options.html_dir)
+	print 'Done'

@@ -1,7 +1,6 @@
 import os
 import utils
-import pickle
-import tempfile
+import multiprocessing
 
 class _matcher(object):
 	"""
@@ -73,24 +72,29 @@ class parser(object):
 		"""
 		self._matchers.append(_matcher(*args, **kwargs))
 
+	def _get_chunks(self, files, path):
+		chunks = list()
+		for file in files:
+			print 'Parsing:', os.path.abspath(file)
+			lines = open(file, 'r').readlines()
+			for matcher in self._matchers:
+				for i, line in enumerate(lines):
+					if matcher(line): chunks.append(_chunk(
+						file = os.path.relpath(file, path),
+						lines = lines,
+						lineno = i,
+						category = matcher.get_category(),
+					))
+		return chunks
+
 	def __call__(self, files, path='/'):
 		num_procs = utils.get_num_procs()
-		tmpfiles = [tempfile.mkstemp()[1] for num in range(num_procs)]
-		for num in range(num_procs):
-			if os.fork(): continue
-			chunks = list()
-			for file in files[num::num_procs]:
-				print 'Parsing:', os.path.abspath(file)
-				lines = open(file, 'r').readlines()
-				for matcher in self._matchers:
-					for i, line in enumerate(lines):
-						if matcher(line): chunks.append(_chunk(
-							file = os.path.relpath(file, path),
-							lines = lines,
-							lineno = i,
-							category = matcher.get_category(),
-						))
-			pickle.dump(chunks, open(tmpfiles[num], 'wb'))
-			exit()
-		for num in range(num_procs): os.wait()
-		return _result(sum([pickle.load(open(tmpfile, 'rb')) for tmpfile in tmpfiles], []))
+		chunks = multiprocessing.Manager().list()
+		procs = [multiprocessing.Process(
+			target=lambda *files: chunks.extend(
+				self._get_chunks(files=files, path=path)),
+			args=files[num::num_procs],
+		) for num in range(num_procs)]
+		map(multiprocessing.Process.start, procs)
+		map(multiprocessing.Process.join, procs)
+		return _result(list(chunks))
