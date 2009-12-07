@@ -54,11 +54,15 @@
 			#set $subresult = $result.get_subset(files=[$file])
 		<a name="$file"></a>
 			#for $i, $chunk in enumerate($subresult.get_chunks())
-				<h3>$(i+1): $file ($chunk.get_category())</h3>
+				<h3>$(i+1): $file &mdash; $chunk.get_category(): $chunk.get_message()</h3>
 				<pre>
 					#for $lineno, $line in enumerate($chunk.get_lines())
 						#if $chunk.get_lineno()-5 < $lineno < $chunk.get_lineno()+5
+							#if $chunk.get_lineno() == $lineno
+<span style="background-color:#99ccff"><strong>$($lineno+1)</strong>        $escape($line[:-1])</span>
+							#else
 $($lineno+1)        $escape($line[:-1])
+							#end if
 						#end if
 					#end for
 				</pre>

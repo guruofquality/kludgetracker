@@ -23,7 +23,10 @@ class generator(object):
 		for subdir in subdirs:
 			#ensure that the directory exists
 			dir = os.path.join(gen_dir, subdir)
-			if not os.path.exists(dir): os.makedirs(dir)
+			if not os.path.exists(dir):
+				#could fail if another process also did makedirs
+				try: os.makedirs(dir)
+				except: pass
 			#generate the html file
 			html_file = os.path.abspath(os.path.join(dir, 'index.html'))
 			print 'Generating:', html_file

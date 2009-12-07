@@ -4,7 +4,7 @@ import multiprocessing
 
 class _matcher(object):
 	"""
-	Hold a matcher function and its associated information.
+	Hold a line matcher function and its associated information.
 	"""
 	def __init__(self, matcher, category='default'):
 		self._matcher = matcher
@@ -17,16 +17,18 @@ class _chunk(object):
 	"""
 	A single line with a todofixme and its associated information.
 	"""
-	def __init__(self, file, lines, lineno, category):
+	def __init__(self, file, lines, lineno, category, message):
 		self._file = file
 		self._lines = lines
 		self._lineno = lineno
 		self._category = category
+		self._message = message
 
 	def get_file(self): return self._file
 	def get_lines(self): return self._lines
 	def get_lineno(self): return self._lineno
 	def get_category(self): return self._category
+	def get_message(self): return self._message
 
 class _result(object):
 	"""
@@ -63,27 +65,49 @@ class parser(object):
 	A collection of matchers.
 	"""
 	def __init__(self):
-		self._matchers = list()
+		self._line_matchers = list()
+		self._file_matchers = list()
 
-	def register_matcher(self, *args, **kwargs):
+	def register_line_matcher(self, *args, **kwargs):
 		"""
-		Register a new matcher function.
-		@param matcher a function that takes a string and returns true/false
+		Register a new line matcher function.
+		A line matcher is a function that takes a single line
+		and returns true if the line is a match.
 		"""
-		self._matchers.append(_matcher(*args, **kwargs))
+		self._line_matchers.append(_matcher(*args, **kwargs))
+
+	def register_file_matcher(self, *args, **kwargs):
+		"""
+		Register a new file matcher function.
+		A file matcher is a function that takes a file path
+		and returns a list of (line number, message) tuples
+		"""
+		self._file_matchers.append(_matcher(*args, **kwargs))
 
 	def _get_chunks(self, files, path):
 		chunks = list()
 		for file in files:
 			print 'Parsing:', os.path.abspath(file)
 			lines = open(file, 'r').readlines()
-			for matcher in self._matchers:
+			#call each file matcher
+			for matcher in self._file_matchers:
+				for lineno, message in matcher(file):
+					chunks.append(_chunk(
+						file = os.path.relpath(file, path),
+						lines = lines,
+						lineno = lineno,
+						category = matcher.get_category(),
+						message = message,
+					))
+			#call each line matcher
+			for matcher in self._line_matchers:
 				for i, line in enumerate(lines):
 					if matcher(line): chunks.append(_chunk(
 						file = os.path.relpath(file, path),
 						lines = lines,
 						lineno = i,
 						category = matcher.get_category(),
+						message = '',
 					))
 		return chunks
 
