@@ -15,6 +15,7 @@ def pyflakes_matcher(file_name):
 			lineno, message = re.match('^.*:(\d*):(.*)$', line).groups()
 			#pyflakes messages that we intend to skip:
 			if message.endswith('imported but unused'): continue
+			if message.endswith('but never used'): continue
 			if message.endswith('unable to detect undefined names'): continue
 			results.append((int(lineno)-1, message))
 		except: pass
