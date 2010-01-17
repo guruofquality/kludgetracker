@@ -1,5 +1,7 @@
 #from xml.sax.saxutils import escape
 #import os
+#set $subdirs = $result.get_subdirs()
+#set $subdirs = filter(lambda sd: len(sd) > len($rel_dir), $subdirs)
 <html>
 	<head>
 		<title>$rel_dir - $title</title>
@@ -7,32 +9,26 @@
 	</head>
 	<body>
 		<h1>$title</h1>
+		#if $os.path.dirname($rel_dir)
+		<span style="float:right;">
+			<a href="$os.path.join('..', 'index.html')">
+				Parent Directory
+			</a> ($os.path.dirname($rel_dir))
+		</span>
+		#end if
 		####### summary #######
 		<h2>Kludge Summary of $rel_dir</h2>
-		#if $os.path.dirname($rel_dir)
-		<p>
-			<a href="$os.path.join('..', 'index.html')">Parent Directory ($os.path.dirname($rel_dir))</a>
-		</p>
-		#end if
 		<table>
 			<tr>
-				<th>Category</th>
-				<th>Total</th>
-			</tr>
-			#for $cat in sorted($result.get_categories())
-			<tr>
-				<td>$cat</td>
-				<td>$len($result.get_subset(categories=[$cat]))</td>
-			</tr>
-			#end for
-			<tr>
-				<th>Total</th>
+				<th>Total Kludges</th>
 				<td>$len($result)</td>
+			</tr>
+			<tr>
+				<th>Total Subdirs</th>
+				<td>$len($subdirs)</td>
 			</tr>
 		</table>
 		####### build dir toc #######
-		#set $subdirs = $result.get_subdirs()
-		#set $subdirs = filter(lambda sd: len(sd) > len($rel_dir), $subdirs)
 		<h3>All Directories within $rel_dir</h3>
 		<ul>
 		#for $subdir in $sorted($subdirs)
@@ -51,10 +47,22 @@
 		####### file list #######
 		<h2>Kludge Snippets in $rel_dir</h2>
 		#for $file in $files
-			#set $subresult = $result.get_subset(files=[$file])
-		<a name="$file"></a>
-			#for $i, $chunk in enumerate($subresult.get_chunks())
-				<h3>$(i+1): $file &mdash; $chunk.get_category(): $chunk.get_message()</h3>
+			<a name="$file"></a>
+			#set $chunks = $result.get_subset(files=[$file]).get_chunks()
+			#for $i, $chunk in enumerate($chunks)
+				#if len($chunks) > 1
+					<h3>$file &mdash; $(i+1)</h3>
+				#else
+					<h3>$file</h3>
+				#end if
+				<table>
+				#for $key, $value in $chunk.get_info()
+					<tr>
+						<th>$key</th>
+						<td>$value</td>
+					</tr>
+				#end for
+				</table>
 				<pre>
 					#for $lineno, $line in enumerate($chunk.get_lines())
 						#if $chunk.get_lineno()-5 < $lineno < $chunk.get_lineno()+5

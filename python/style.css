@@ -55,11 +55,12 @@ font-size:90%;
 }
 
 table{
-padding:10px;
+padding:5px;
+font-size:95%;
 }
 
 th{
-padding:7px;
+padding:3px 7px 3px 7px;
 border:1px solid #333333;
 text-align:center;
 color:inherit;
@@ -70,7 +71,7 @@ tr{
 }
 
 td{
-padding:5px;
+padding:3px 7px 3px 7px;
 border:1px solid #333333;
 text-align:center;
 color:inherit;
