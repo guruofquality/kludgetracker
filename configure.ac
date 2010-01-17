@@ -1,5 +1,5 @@
 AC_PREREQ(2.60)
-AC_INIT(kludgetracker, esyscmd([svnversion | tr -d '\n']))
+AC_INIT(kludgetracker, 0)
 AM_INIT_AUTOMAKE
 ##################################################
 ## Python Check
